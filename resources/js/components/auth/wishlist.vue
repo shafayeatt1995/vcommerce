@@ -27,24 +27,24 @@
                             <empty message="Your wishlist is empty"></empty>
                         </td>
                     </tr>
-                    <tr v-for="data in wishlists" :key="data.id" v-else>
+                    <tr v-for="(data, key) in wishlists" :key="key" v-else>
                         <td>
-                            <router-link :to="data.product.slug + '/product'"><img :src="data.product.feature_image" :alt="data.product.name"/></router-link>
+                            <router-link :to="data.slug + '/product'"><img :src="data.feature_image" :alt="data.name"/></router-link>
                         </td>
                         <td class="text-left">
-                            <router-link :to="data.product.slug + '/product'">{{data.product.name}}</router-link>
+                            <router-link :to="data.slug + '/product'">{{data.name}}</router-link>
                         </td>
                         <td>
-                            <div class="badge color-white" :class="data.product.stock_status == 1 ? 'bg-green' : 'bg-red'">{{data.product.stock_status == 1 ? "In Stock" : "Out Of Stock"}}</div>
+                            <div class="badge color-white" :class="data.stock_status == 1 ? 'bg-green' : 'bg-red'">{{data.stock_status == 1 ? "In Stock" : "Out Of Stock"}}</div>
                         </td>
-                        <td v-if="data.product.discount_fixed == null">
-                            ${{ data.product.price }}
+                        <td v-if="data.discount_fixed == null">
+                            <span v-html="icon"></span> {{data.price * rate | currency}}
                         </td>
-                        <td v-if="data.product.discount_fixed !== null">
-                            <del class="font-red">${{ data.product.price }} </del>${{data.product.price - data.product.discount_fixed}}
+                        <td v-if="data.discount_fixed !== null">
+                            <del class="font-red"><span v-html="icon"></span> {{data.price * rate | currency}} </del><span v-html="icon"></span> {{(data.price - data.discount_fixed) * rate | currency}}
                         </td>
                         <td>
-                            <button type="button" @click="removeWishlist(data.id)"><i class="fas fa-times"></i></button>
+                            <button type="button" @click="removeWishlist(key)"><i class="fas fa-times"></i></button>
                         </td>
                     </tr>
                     </tbody>
@@ -59,34 +59,30 @@
 <script>
     export default {
         title: 'Wishlist',
-        data() {
-            return {};
-        },
 
         methods: {
-            // Remove Product from wishlist
-            removeWishlist(id) {
-                this.$Progress.start();
-                axios.post('/api/wishlist/delete/' + id).then(response => {
-                    this.$store.dispatch('getWishlist');
-                    Fire.$emit('success', response.data);
-                    this.$Progress.finish();
-                });
+            // Remove Product Wishlist
+            removeWishlist(key){
+                this.$store.dispatch('removeWishlist', key);
+                Fire.$emit('success', 'Product Successfully Remove Your Wishlist');
             },
         },
 
         computed: {
+            // Get Wishlist Data
             wishlists() {
                 return this.$store.state.wishlists;
             },
-        },
 
-        created() {
-            this.$Progress.start();
-            if (!this.$middleware.authCheck()) {
-                this.$router.push('/login');
-                this.$Progress.fail();
-            }
+            // Load Currency Rate
+            rate(){
+                return this.$store.state.currency.rate;
+            },
+
+            // Load Currency Icon
+            icon(){
+                return this.$store.state.currency.icon;
+            },
         },
     };
 </script>

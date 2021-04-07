@@ -578,7 +578,7 @@
             // Add Or Remove Tag Option
             addTag(event) {
                 let tag = this.form.tags;
-                let exists = tag.some((tag) => {
+                let exists = tag.some(tag => {
                     return event.target.value === tag.value || event.target.value === '';
                 });
 

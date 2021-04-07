@@ -69,11 +69,6 @@ class Product extends Model
         return $this->hasMany('App\Models\QNA');
     }
 
-    public function wishlists()
-    {
-        return $this->hasMany('App\Models\Wishlist');
-    }
-
     public function carts()
     {
         return $this->hasMany('App\Models\Cart');

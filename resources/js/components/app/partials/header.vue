@@ -311,7 +311,7 @@
                         </li>
                         <li class="float-right nav-cart">
                             <router-link to="/wishlist"><i class="far fa-heart"></i>
-                                <small>{{ wishlists }}</small>
+                                <small>{{ wishlists.length }}</small>
                             </router-link>
                         </li>
                     </ul>
@@ -400,7 +400,7 @@
         computed: {
             // Wishlist Product Count
             wishlists() {
-                return this.$store.state.wishlists.length;
+                return this.$store.state.wishlists;
             },
 
             // Cart Data
@@ -443,13 +443,6 @@
             icon(){
                 return this.$store.state.currency.icon;
             },
-        },
-
-        created() {
-            if (this.$middleware.authCheck()) {
-                this.$store.dispatch('getCart');
-                this.$store.dispatch('getWishlist');
-            }
         },
 
         watch: {

@@ -78,11 +78,6 @@ class User extends Authenticatable
         return $this->hasMany('App\Models\QNAReply');
     }
 
-    public function wishlists()
-    {
-        return $this->hasMany('App\Models\Wishlist');
-    }
-
     public function carts()
     {
         return $this->hasMany('App\Models\Cart');

@@ -355,9 +355,9 @@ class ProductController extends Controller
 
     public function getProduct($slug)
     {
-        $product = Product::active()->status()->where('slug', $slug)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user', 'wishlists','reviews')->first();
+        $product = Product::active()->status()->where('slug', $slug)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user','reviews')->first();
         if(isset($product)){
-            $products = Product::active()->status()->where('sub_category_id', $product->sub_category_id)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user', 'wishlists')->inRandomOrder()->take(10)->get();
+            $products = Product::active()->status()->where('sub_category_id', $product->sub_category_id)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user')->inRandomOrder()->take(10)->get();
 //            $viewCount = 'product_'.$product->id;
 //            if (!Session::has($viewCount)){
 //                $product->increment('view_count');

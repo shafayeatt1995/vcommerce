@@ -24,6 +24,9 @@
 
         created(){
             this.$store.dispatch('getCurrencies');
+            this.$store.dispatch('getCart');
+            this.$store.dispatch('getWishlist');
+
             Fire.$on('success', success => {
                 Toast.fire({icon: 'success', title: success,});
             });

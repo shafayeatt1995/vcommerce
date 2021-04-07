@@ -15,8 +15,19 @@ export const store = new Vuex.Store({
         },
     },
     mutations: {
-        setWishlist(state, wishlist){
-            state.wishlists = wishlist;
+        setWishlist(state){
+            state.wishlists = localStorage.getItem(btoa('wishlist')) !== null ? atob(JSON.parse(localStorage.getItem(btoa('wishlist')))) : [];
+        },
+
+        updateWishlist(state, product){
+            let productData = {id: product.id, name: product.name, slug: product.slug, feature_image: product.feature_image, stock_status: product.stock_status, price: product.price, discount_fixed: product.discount_fixed};
+            state.wishlists.push(productData);
+            localStorage.setItem(btoa('wishlist'), btoa(JSON.stringify(state.wishlists)));
+        },
+
+        deleteWishlist(state, key){
+            state.wishlists.splice(key, 1);
+            localStorage.setItem(btoa('wishlist'), btoa(JSON.stringify(state.wishlists)));
         },
 
         setCart(state, cart){
@@ -36,9 +47,17 @@ export const store = new Vuex.Store({
     actions: {
         // Get Wishlist Information
         getWishlist(context){
-            axios.get('/api/wishlist').then(response => {
-                context.commit('setWishlist', response.data);
-            });
+            context.commit('setWishlist');
+        },
+
+        // Add Wishlist Information
+        addWishlist(context, product){
+            context.commit('updateWishlist', product);
+        },
+
+        // Remove Wishlist Information
+        removeWishlist(context, key){
+            context.commit('deleteWishlist', key);
         },
 
         // Get Cart Information

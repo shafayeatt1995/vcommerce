@@ -437,10 +437,9 @@
                     maxFiles: 15,
                     dictMaxFilesExceeded: 'You Can Not Upload More Than 15 images',
                     dictDefaultMessage: '<i class="fas fa-cloud-upload-alt"></i> Drop File Here To Upload. Max File Size 2 MB. Maximum Upload 15 Images. Use Square Image For Better Output',
-                    success: function (file, response) {
-                    },
+                    success: function (file, response) {},
                     error: function (response, xhr) {
-                        Fire.$emit('error', 'Have some problem to upload an image');
+                        Fire.$emit('error', 'You Can Not Upload More Than 15 images');
                     },
                     init: function () {
                         this.on('complete', function () {

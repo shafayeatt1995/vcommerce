@@ -9,7 +9,7 @@
                     </button>
                 </li>
                 <li>
-                    <wishlist :productId="product.id" activeText="<i class='fas fa-heart color-blue'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
+                    <wishlist :product="product" activeText="<i class='fas fa-heart color-blue'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
                 </li>
             </ul>
             <router-link :to="'/' + product.slug + '/product'">

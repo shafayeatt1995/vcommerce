@@ -78,11 +78,6 @@ Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
     Route::post('product/{id}/review', 'ReviewController@deleteReview');
     Route::post('product/{id}/review-replay', 'ReviewController@deleteReviewReplay');
 
-    // product wishlist route
-    Route::get('wishlist', 'WishlistController@index');
-    Route::post('wishlist/create/{id}', 'WishlistController@create');
-    Route::post('wishlist/delete/{wishlist}', 'WishlistController@delete');
-
     // product Cart route
     Route::get('cart', 'CartController@index');
     Route::get('cart/check', 'CartController@check');

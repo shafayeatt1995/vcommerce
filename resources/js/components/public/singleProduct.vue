@@ -92,7 +92,7 @@
                                                 <button type="button" class="cta-blue-btn">Buy Now</button>
                                             </li>
                                             <li>
-                                                <wishlist :productId="product.id" activeClass="cta-grey-btn" deactiveClass="cta-grey-btn" activeText="<i class='fas fa-heart'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
+                                                <wishlist :product="product" activeClass="cta-grey-btn" deactiveClass="cta-grey-btn" activeText="<i class='fas fa-heart'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
                                             </li>
                                         </ul>
                                     </div>
