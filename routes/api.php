@@ -46,6 +46,7 @@ Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
     Route::post('coupon','CouponController@store');
     Route::post('coupon/{coupon}','CouponController@update');
     Route::post('coupon-delete/{coupon}','CouponController@destroy');
+    Route::post('cart/coupon', 'CouponController@coupon');
 
     // All Store Route
     Route::get('store','StoreController@index');
@@ -77,14 +78,6 @@ Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
     Route::post('product/review/replay', 'ReviewController@postReviewReplay');
     Route::post('product/{id}/review', 'ReviewController@deleteReview');
     Route::post('product/{id}/review-replay', 'ReviewController@deleteReviewReplay');
-
-    // product Cart route
-    Route::get('cart', 'CartController@index');
-    Route::get('cart/check', 'CartController@check');
-    Route::post('cart/create/', 'CartController@create');
-    Route::post('cart/update/', 'CartController@update');
-    Route::post('cart/delete/{cart}', 'CartController@delete');
-    Route::post('cart/coupon', 'CartController@coupon');
 
     // Product Order Route
     Route::get('order', 'OrderController@index');

@@ -84,25 +84,27 @@
                                                 <td class="text-center align-middle">
                                                     <table>
                                                         <tr v-if="!data.discount_fixed">
-                                                            <td class="border-none">Price:</td>
-                                                            <td class="border-none">{{ data.price }}</td>
+                                                            <td class="border-none">Current Price:</td>
+                                                            <td class="border-none"><span v-html="icon"></span> {{ data.price * rate | currency }}</td>
                                                         </tr>
                                                         <tr v-if="data.discount_fixed">
                                                             <td class="border-none">Previous Price:</td>
                                                             <td class="border-none">
-                                                                <del>{{ data.price }}</del>
+                                                                <del><span v-html="icon"></span> {{ data.price * rate | currency }}</del>
                                                             </td>
                                                         </tr>
                                                         <tr v-if="data.discount_fixed">
-                                                            <td class="border-none">Discount Price:</td>
+                                                            <td class="border-none">Discount:</td>
                                                             <td class="border-none">
-                                                                {{ data.discount_fixed }}
+                                                                <span v-html="icon"></span>
+                                                                {{ data.discount_fixed * rate | currency }}
                                                             </td>
                                                         </tr>
                                                         <tr v-if="data.discount_fixed">
                                                             <td class="border-none">Current Price:</td>
                                                             <td class="border-none">
-                                                                {{ data.price - data.discount_fixed }}
+                                                                <span v-html="icon"></span>
+                                                                {{ (data.price - data.discount_fixed) * rate | currency }}
                                                             </td>
                                                         </tr>
                                                         <tr v-if="data.discount_fixed">
@@ -240,6 +242,18 @@
                 this.$router.push('/login');
                 this.$Progress.fail()
             }
+        },
+
+        computed: {
+            // Load Currency Rate
+            rate(){
+                return this.$store.state.currency.rate;
+            },
+
+            // Load Currency Icon
+            icon(){
+                return this.$store.state.currency.icon;
+            },
         }
     };
 </script>

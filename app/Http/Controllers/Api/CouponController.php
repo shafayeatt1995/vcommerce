@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Coupon;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
@@ -114,5 +115,24 @@ class CouponController extends Controller
 
         $coupons = Coupon::latest()->get();
         return response()->json($coupons);
+    }
+
+    public function coupon(Request $request)
+    {
+        $this->authorize('authCheck');
+        $today = Carbon::now()->toDateString();
+        $find = Coupon::where('coupon', $request->code)->whereDate('start_date', '<=', $today)->whereDate
+        ('end_date', '>=', $today)->first();
+        if(isset($find)) {
+            if ($find->usages === null) {
+                $coupon = $find;
+            } else {
+                $exist = Auth::user()->orders->where('coupon_id', $find->id)->count();
+                $coupon = $exist < $find->usages ? $find:['message'=>'You Can Use This Coupon Maximum '.$find->usages.' Time'];
+            }
+            return response()->json($coupon);
+        } else{
+            return response()->json(['message'=>'Please use a valid coupon'], 422);
+        }
     }
 }
