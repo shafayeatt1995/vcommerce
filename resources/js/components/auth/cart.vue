@@ -1,6 +1,6 @@
 <template>
     <!--Cart area start-->
-    <div class="shopping-cart" v-if="$middleware.authCheck()">
+    <div class="shopping-cart">
         <div v-if="carts.length > 0" class="container">
             <div class="section-title">
                 <div class="row">
@@ -26,38 +26,38 @@
                         </tr>
                         </thead>
                         <tbody>
-                        <tr v-for="cart in carts" :key="cart.id">
+                        <tr v-for="(product, key) in carts" :key="key">
                             <td>
-                                <router-link :to="'/' + cart.product.slug + '/product'">
-                                    <img :src="cart.product.feature_image" :alt="cart.product.name" class="img-fluid text-center"/>
+                                <router-link :to="'/' + product.slug + '/product'">
+                                    <img :src="product.feature_image" :alt="product.name" class="img-fluid text-center"/>
                                 </router-link>
                             </td>
                             <td class="text-left">
-                                <router-link :to="'/' + cart.product.slug + '/product'">{{cart.product.name}}</router-link>
+                                <router-link :to="'/' + product.slug + '/product'">{{product.name}}</router-link>
                             </td>
-                            <td>{{cart.color.name}} <span class="square" :style="'background-color:' + cart.color.color + ';'"></span></td>
-                            <td>{{cart.variant.variant}}</td>
+                            <td>{{product.colorName}} <span class="square" :style="'background-color:' + product.colorCode + ';'"></span></td>
+                            <td>{{product.variantName}}</td>
                             <td>
-                                <p v-if="cart.product.discount_fixed == null">
-                                    <span v-html="icon"></span> {{ cart.product.price * rate | currency}}
+                                <p v-if="product.discount_fixed == null">
+                                    <span v-html="icon"></span> {{ product.price * rate | currency}}
                                 </p>
                                 <p v-else>
-                                    <del class="color-red mr-1"><span v-html="icon"></span> {{ cart.product.price * rate | currency }}</del>
-                                    <span v-html="icon"></span> {{(cart.product.price - cart.product.discount_fixed) * rate | currency}}
+                                    <del class="color-red mr-1"><span v-html="icon"></span> {{ product.price * rate | currency }}</del>
+                                    <span v-html="icon"></span> {{(product.price - product.discount_fixed) * rate | currency}}
                                 </p>
                             </td>
                             <td>
                                 <div class="cart-plus-minus">
-                                    <div class="dec qtybutton" @click="cartDecrease(), cart.quantity > 1 ? cart.quantity-- : ''">-</div>
-                                    <input class="cart-plus-minus-box" type="text" name="qtybutton" :value="cart.quantity"/>
-                                    <div class="inc qtybutton" @click="cartIncrease(), cart.quantity++">+</div>
+                                    <div class="dec qtybutton" @click="cartDecrease(), product.quantity > 1 ? product.quantity-- : ''">-</div>
+                                    <span class="cart-plus-minus-box" type="text" name="qtybutton">{{product.quantity}}</span>
+                                    <div class="inc qtybutton" @click="cartIncrease(), product.quantity++">+</div>
                                 </div>
                             </td>
                             <td>
-                                <span v-html="icon"></span> {{(cart.quantity * (cart.product.price - cart.product.discount_fixed)) * rate | currency}}
+                                <span v-html="icon"></span> {{(product.quantity * (product.price - product.discount_fixed)) * rate | currency}}
                             </td>
                             <td>
-                                <button @click="deleteCart(cart.id)">
+                                <button @click="deleteCart(key)">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </td>
@@ -122,9 +122,6 @@
         </div>
     </div>
     <!--Cart area end-->
-    <div v-else>
-        <error></error>
-    </div>
 </template>
 
 <script>
@@ -152,31 +149,15 @@
 
             // Cart Information Update
             updateCart() {
-                this.$Progress.start();
-                axios.post('/api/cart/update', this.cartInfo).then(response => {
-                    this.$store.dispatch('getCart');
-                    this.cartUpdate = false;
-                    Fire.$emit('success', response.data);
-                    this.$Progress.finish();
-                },
-                () => {
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+                this.$store.dispatch('cartProductUpdate', this.cartInfo);
+                this.cartUpdate = false;
+                Fire.$emit('success', 'Cart Successfully Update');
             },
 
             // Delete Cart Product
-            deleteCart(id) {
-                this.$Progress.start();
-                axios.post('/api/cart/delete/' + id).then(response => {
-                    this.$store.dispatch('getCart');
-                    Fire.$emit('success', response.data);
-                    this.$Progress.finish();
-                },
-                () => {
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+            deleteCart(key) {
+                this.$store.dispatch('removeCart', key);
+                Fire.$emit('success', 'Product Successfully Remove From Cart');
             },
         },
 
@@ -189,21 +170,21 @@
             // Cart Subtotal Price
             cartPrice() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * cart.product.price);
+                    return (sum += cart.quantity * cart.price);
                 }, 0);
             },
 
             // Cart Discount Price
             cartDiscount() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * cart.product.discount_fixed);
+                    return (sum += cart.quantity * cart.discount_fixed);
                 }, 0);
             },
 
             // Cart Total Price
             cartTotal() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * (cart.product.price - cart.product.discount_fixed));
+                    return (sum += cart.quantity * (cart.price - cart.discount_fixed));
                 }, 0);
             },
 
@@ -216,12 +197,6 @@
             icon(){
                 return this.$store.state.currency.icon;
             },
-        },
-
-        created() {
-            if (!this.$middleware.authCheck()) {
-                this.$router.push('/login');
-            }
-        },
+        }
     };
 </script>

@@ -7,22 +7,22 @@
             </button>
             <h3>Shopping Cart</h3>
             <div v-if="carts.length > 0">
-                <div class="off-canvas-cart-product" v-for="(cart, key) in carts" :key="cart.id">
-                    <router-link :to="'/' + cart.product.slug + '/product'" class="off-canvas-cart-product-image">
-                        <img :src="'/' + cart.product.feature_image" alt="cart.product.name" class="img-fluid"/>
+                <div class="off-canvas-cart-product" v-for="(product, key) in carts" :key="key">
+                    <router-link :to="'/' + product.slug + '/product'" class="off-canvas-cart-product-image">
+                        <img :src="'/' + product.feature_image" alt="cart.product.name" class="img-fluid"/>
                     </router-link>
                     <div class="off-canvas-cart-product-info">
-                        <router-link :to="'/' + cart.product.slug + '/product'">
-                            {{cart.product.name.length > 60 ? cart.product.name.substring(0, 60) + "..." : cart.product.name}}
+                        <router-link :to="'/' + product.slug + '/product'">
+                            {{product.name.length > 60 ? product.name.substring(0, 60) + "..." : product.name}}
                         </router-link>
                         <h5>
-                            <span class="pointer p-1" @click="cartDecrease(), cart.quantity > 1 ? cart.quantity-- : ''">-</span>
-                            {{ cart.quantity }}
-                            <span class="pointer p-1" @click="cartIncrease(), cart.quantity++">+</span>
+                            <span class="pointer p-1" @click="cartDecrease(), product.quantity > 1 ? product.quantity-- : ''">-</span>
+                            {{ product.quantity }}
+                            <span class="pointer p-1" @click="cartIncrease(), product.quantity++">+</span>
                             <i class="fas fa-times"></i>
-                            <span v-html="icon"></span> {{ (cart.product.discount_fixed ? cart.product.price - cart.product.discount_fixed : cart.product.price) * rate }} = <span><span v-html="icon"></span>{{ (cart.quantity * (cart.product.price - cart.product.discount_fixed)) * rate | currency }}</span>
+                            <span v-html="icon"></span> {{ (product.discount_fixed ? product.price - product.discount_fixed : product.price) * rate }} = <span><span v-html="icon"></span>{{ (quantity * (product.price - product.discount_fixed)) * rate | currency }}</span>
                         </h5>
-                        <button @click="deleteCart(cart.id)">
+                        <button @click="deleteCart(key)">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
@@ -364,31 +364,15 @@
 
             // Cart Information Update
             updateCart() {
-                this.$Progress.start();
-                axios.post('/api/cart/update', this.cartInfo).then(response => {
-                    this.$store.dispatch('getCart');
-                    this.cartUpdate = false;
-                    Fire.$emit('success', response.data);
-                    this.$Progress.finish();
-                },
-                () => {
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+                this.$store.dispatch('cartProductUpdate', this.cartInfo);
+                this.cartUpdate = false;
+                Fire.$emit('success', 'Cart Successfully Update');
             },
 
             // Delete cart Product
-            deleteCart(id) {
-                this.$Progress.start();
-                axios.post('/api/cart/delete/' + id).then(response => {
-                    this.$store.dispatch('getCart');
-                    Fire.$emit('success', response.data);
-                    this.$Progress.finish();
-                },
-                () => {
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+            deleteCart(key) {
+                this.$store.dispatch('removeCart', key);
+                Fire.$emit('success', 'Product Successfully Remove From Cart');
             },
 
             // Change Currency
@@ -411,21 +395,21 @@
             // Cart Subtotal Amount
             cartSubTotal() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * cart.product.price);
+                    return (sum += cart.quantity * cart.price);
                 }, 0);
             },
 
             // Cart Discount Amount
             cartDiscount() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * cart.product.discount_fixed);
+                    return (sum += cart.quantity * cart.discount_fixed);
                 }, 0);
             },
 
             // Cart Total Amount
             cartTotal() {
                 return this.carts.reduce((sum, cart) => {
-                    return (sum += cart.quantity * (cart.product.price - cart.product.discount_fixed));
+                    return (sum += cart.quantity * (cart.price - cart.discount_fixed));
                 }, 0);
             },
 

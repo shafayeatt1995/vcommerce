@@ -121,6 +121,7 @@ Route::group(['namespace'=>'Api'], function (){
     // Product Related Route
     Route::get('{slug}/product', 'ProductController@getProduct');
     Route::get('{slug}/random-product', 'ProductController@randomProduct');
+    Route::post('product/view-count/{product}', 'ProductController@viewCount');
     Route::get('product/{id}/qna', 'QnaController@getQna');
     Route::get('product/{id}/review', 'ReviewController@getReview');
 

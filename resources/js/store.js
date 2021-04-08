@@ -14,9 +14,10 @@ export const store = new Vuex.Store({
             rate:'',
         },
     },
+
     mutations: {
         setWishlist(state){
-            state.wishlists = localStorage.getItem(btoa('wishlist')) !== null ? atob(JSON.parse(localStorage.getItem(btoa('wishlist')))) : [];
+            state.wishlists = localStorage.getItem(btoa('wishlist')) !== null ? JSON.parse(atob(localStorage.getItem(btoa('wishlist')))) : [];
         },
 
         updateWishlist(state, product){
@@ -30,41 +31,72 @@ export const store = new Vuex.Store({
             localStorage.setItem(btoa('wishlist'), btoa(JSON.stringify(state.wishlists)));
         },
 
-        setCart(state, cart){
-            state.carts = cart;
+        setCart(state){
+            state.carts = localStorage.getItem(btoa('carts')) !== null ? JSON.parse(atob(localStorage.getItem(btoa('carts')))) : [];
+        },
+
+        updateCart(state, cart){
+            let cartData = {id: cart.product.id, name: cart.product.name, slug: cart.product.slug, feature_image: cart.product.feature_image, price: cart.product.price, discount_fixed: cart.product.discount_fixed, color_code: cart.colorCode, color_name: cart.colorName, variant: cart.variantName, quantity: cart.quantity};
+            state.carts.push(cartData);
+            localStorage.setItem(btoa('carts'), btoa(JSON.stringify(state.carts)));
+        },
+
+        productUpdateCart(state, products){
+            state.carts = products;
+            localStorage.setItem(btoa('carts'), btoa(JSON.stringify(state.carts)));
+        },
+
+        deleteCart(state, key){
+            state.carts.splice(key, 1);
+            localStorage.setItem(btoa('carts'), btoa(JSON.stringify(state.carts)));
         },
 
         setCurrency(state, currency){
             state.currency.icon = currency.icon;
             state.currency.name = currency.name;
             state.currency.rate = currency.rate;
+            localStorage.setItem(btoa('currency'), btoa(currency.id));
         },
 
         setCurrencies(state, currencies){
             state.currencies = currencies;
         }
     },
+
     actions: {
-        // Get Wishlist Information
+        // Get Wishlist Product Information
         getWishlist(context){
             context.commit('setWishlist');
         },
 
-        // Add Wishlist Information
+        // Add Wishlist Product Information
         addWishlist(context, product){
             context.commit('updateWishlist', product);
         },
 
-        // Remove Wishlist Information
+        // Remove Wishlist Product Information
         removeWishlist(context, key){
             context.commit('deleteWishlist', key);
         },
 
-        // Get Cart Information
+        // Get Cart Product Information
         getCart(context){
-            axios.get('/api/cart').then(response => {
-                context.commit('setCart', response.data);
-            });
+            context.commit('setCart');
+        },
+
+        // Add Cart Product Information
+        addCart(context, cart){
+            context.commit('updateCart', cart);
+        },
+
+        // Remove Cart Product Information
+        removeCart(context, key){
+            context.commit('deleteCart', key);
+        },
+
+        // Cart Product Update
+        cartProductUpdate(context, products){
+            context.commit('productUpdateCart', products);
         },
 
         // Get Currency Information
@@ -91,9 +123,9 @@ export const store = new Vuex.Store({
 
         // Change Currency
         changeCurrency(context, response){
-            localStorage.setItem(btoa('currency'), btoa(response.id));
             context.commit('setCurrency', response);
         },
     },
+
     getters: {}
 });

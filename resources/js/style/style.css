@@ -2368,7 +2368,7 @@ header {
 .cart-plus-minus .dec.qtybutton {
 	height: 45px;
 	left: 0;
-	padding-top: 10px;
+	padding-top: 12px;
 	top: 0;
 }
 
@@ -2384,7 +2384,7 @@ header {
 	background: #ddd;
 }
 
-.cart-plus-minus input.cart-plus-minus-box {
+.cart-plus-minus span.cart-plus-minus-box {
 	background: transparent;
 	border: medium none;
 	color: #555;
@@ -2396,8 +2396,8 @@ header {
 	padding: 0;
 	text-align: center;
 	width: 80px;
+	line-height: 40px;
 }
-
 
 .single-product-color input[type="radio"],
 .filter-color input[type="checkbox"] {

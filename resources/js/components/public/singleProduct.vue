@@ -57,46 +57,44 @@
                                     </ul>
                                 </div>
                                 <!--Add to cart area start-->
-                                <form @submit.prevent="cartForm">
-                                    <div class="single-product-size">
-                                        <p>Variant</p>
-                                        <ul>
-                                            <li v-for="(data, key) in product.variants" :key="data.id">
-                                                <input type="radio" :id="'variant' + key" name="Variant" :value="data.id" :disabled="product.stock_status !== 1" v-model="cart.variant"/>
-                                                <label :for="'variant' + key">{{data.variant}}</label>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="single-product-color">
-                                        <p>Color</p>
-                                        <ul>
-                                            <li v-for="(data, key) in product.colors" class="mr-2" :key="data.id">
-                                                <input type="radio" :id="'color' + key" name="color" :value="data.id" :disabled="product.stock_status !== 1" v-model="cart.color"/>
-                                                <label :for="'color' + key" :style="'background-color:' + data.color + ';'"></label>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                    <div class="single-product-purchase">
-                                        <ul>
-                                            <li>
-                                                <div class="cart-plus-minus">
-                                                    <div class="dec qtybutton" @click="cart.quantity > 1 ? cart.quantity-- : ''">-</div>
-                                                    <input class="cart-plus-minus-box" type="text" name="qtybutton" v-model="cart.quantity"/>
-                                                    <div class="inc qtybutton" @click="cart.quantity++">+</div>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <button type="submit" class="cta-grey-btn">Add To Cart <span v-if="carts.some(cart => cart.product_id === product.id)"><i class="far fa-check-circle"></i></span></button>
-                                            </li>
-                                            <li>
-                                                <button type="button" class="cta-blue-btn">Buy Now</button>
-                                            </li>
-                                            <li>
-                                                <wishlist :product="product" activeClass="cta-grey-btn" deactiveClass="cta-grey-btn" activeText="<i class='fas fa-heart'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </form>
+                                <div class="single-product-size">
+                                    <p>Variant</p>
+                                    <ul>
+                                        <li v-for="(data, key) in product.variants" :key="data.id">
+                                            <input type="radio" :id="'variant' + key" name="Variant" :value="data.id" :disabled="!product.stock_status" v-model="cart.variantId" @change="variant(data)"/>
+                                            <label :for="'variant' + key" @click="variantName = data.variant">{{data.variant}}</label>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="single-product-color">
+                                    <p>Color</p>
+                                    <ul>
+                                        <li v-for="(data, key) in product.colors" class="mr-2" :key="data.id">
+                                            <input type="radio" :id="'color' + key" name="color" :value="data.id" :disabled="!product.stock_status" v-model="cart.colorId" @change="color(data)"/>
+                                            <label :for="'color' + key" :style="'background-color:' + data.color + ';'"></label>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="single-product-purchase">
+                                    <ul>
+                                        <li>
+                                            <div class="cart-plus-minus">
+                                                <div class="dec qtybutton" @click="cart.quantity > 1 ? cart.quantity-- : ''">-</div>
+                                                <span class="cart-plus-minus-box" type="text" name="qtybutton">{{cart.quantity}}</span>
+                                                <div class="inc qtybutton" @click="cart.quantity++">+</div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="cta-grey-btn" @click="carts.findIndex(cart => cart.id === product.id) !== -1 ? removeCart(carts.findIndex(cart => cart.id === product.id)) : addCart()">Add To Cart <span v-if="carts.some(cart => cart.id === product.id)"><i class="far fa-check-circle"></i></span></button>
+                                        </li>
+                                        <li>
+                                            <button type="button" class="cta-blue-btn">Buy Now</button>
+                                        </li>
+                                        <li>
+                                            <wishlist :product="product" activeClass="cta-grey-btn" deactiveClass="cta-grey-btn" activeText="<i class='fas fa-heart'></i>" deactiveText="<i class='far fa-heart'></i>"></wishlist>
+                                        </li>
+                                    </ul>
+                                </div>
                                 <!--Add to cart area end-->
                                 <div class="single-product-category">
                                     <ul>
@@ -239,7 +237,7 @@
                                         <pagination :data="reviews" @pagination-change-page="getReviews"></pagination>
                                     </div>
                                     <div v-else>
-                                        <empty message="No Review Found"></empty>
+                                        <empty message="This Product Have No Review"></empty>
                                     </div>
                                     <div class="mt-80"></div>
                                     <div class="row" v-if="$middleware.authCheck()">
@@ -406,7 +404,7 @@
                                         </div>
                                     </div>
                                     <div v-else>
-                                        <empty message="No Question Found"></empty>
+                                        <empty message="This Product Have No Question"></empty>
                                     </div>
 
                                     <div class="mt-80"></div>
@@ -484,12 +482,15 @@
         components: {carousel},
         data() {
             return {
-                cart: new Form({
-                    product_id: '',
+                cart: {
+                    product: {},
                     quantity: '1',
-                    variant: '',
-                    color: '',
-                }),
+                    colorId: '',
+                    colorName: '',
+                    colorCode: '',
+                    variantId: '',
+                    variantName: '',
+                },
                 form: new Form({
                     product_id: '',
                     message: '',
@@ -536,9 +537,12 @@
                     this.product = response.data.product;
                     this.products = response.data.products;
                     this.review.product_id = response.data.product.id;
-                    this.cart.product_id = response.data.product.id;
-                    this.cart.variant = this.carts.find(cart => cart.product_id === this.product.id) ? this.carts.find(cart => cart.product_id === this.product.id).variant_id : response.data.product.variants[0].id;
-                    this.cart.color = this.carts.find(cart => cart.product_id === this.product.id) ? this.carts.find(cart => cart.product_id === this.product.id).color_id : response.data.product.colors[0].id;
+                    this.cart.product = response.data.product;
+                    this.cart.colorId = response.data.product.colors[0].id;
+                    this.cart.colorName = response.data.product.colors[0].name;
+                    this.cart.colorCode = response.data.product.colors[0].color;
+                    this.cart.variantId = response.data.product.variants[0].id;
+                    this.cart.variantName = response.data.product.variants[0].variant;
                     this.loading = true;
                     this.$Progress.finish();
                 },
@@ -548,6 +552,16 @@
                     this.$Progress.fail();
                 }
                 );
+            },
+
+            // Product View Count
+            viewCount(){
+                setTimeout(()=>{
+                    if(localStorage.getItem(btoa(this.product.id+'product')) === null) {
+                        localStorage.setItem(btoa(this.product.id+'product'), btoa(this.product.id+'product'));
+                        axios.post('/api/product/view-count/'+this.product.id);
+                    }
+                }, 15000);
             },
 
             // Load Question And Answer Data
@@ -797,25 +811,6 @@
                 this.reviewReplayBigMessage = this.reviewReplayBigMessage === event ? null : event;
             },
 
-            // Product Add To Cart
-            cartForm() {
-                this.$Progress.start();
-                if (this.$middleware.authCheck()) {
-                    this.cart.post('/api/cart/create/').then(response => {
-                        this.$store.dispatch('getCart');
-                        Fire.$emit('success', response.data);
-                        this.$Progress.finish();
-                    },
-                    () => {
-                        Fire.$emit('error', 'Something Wrong! Please try Again');
-                        this.$Progress.fail();
-                    });
-                } else {
-                    Fire.$emit('info', 'Please Login For Add To Cart');
-                    this.$Progress.fail();
-                }
-            },
-
             // Instant Show Review Image
             reviewImage(event){
                 for (let file of Object.entries(event.target.files)) {
@@ -831,10 +826,34 @@
             removeImage(key){
                 this.review.images.splice(key, 1);
             },
+
+            // Variant Change
+            variant(data){
+                this.cart.variantName = data.variant;
+            },
+
+            // color Change
+            color(data){
+                this.cart.colorName = data.name;
+                this.cart.colorCode = data.color;
+            },
+
+            // Product Add To Cart
+            addCart(){
+                this.$store.dispatch('addCart', this.cart);
+                Fire.$emit('success', 'Product Successfully Add To Cart')
+            },
+
+            // Product Remove From Cart
+            removeCart(key){
+                this.$store.dispatch('removeCart', key);
+                Fire.$emit('success', 'Product Successfully Remove From Cart');
+            },
         },
 
         created() {
             this.loadProduct();
+            this.viewCount();
 
             Fire.$on('getQna', () => {
                 this.getQnas();
@@ -866,7 +885,6 @@
             // Watch route Changes
             $route(to, from) {
                 this.form.reset();
-                this.cart.reset();
                 this.qnaReplay.reset();
                 this.review.reset();
                 this.reviewReplay.reset();
@@ -887,6 +905,7 @@
                 this.reviewBigMessage = null;
                 this.reviewReplayBigMessage = null;
                 this.loadProduct();
+                this.viewCount();
             },
         },
     };

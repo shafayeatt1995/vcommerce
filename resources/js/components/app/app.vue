@@ -18,10 +18,6 @@
 
 <script>
     export default {
-        data(){
-            return{}
-        },
-
         created(){
             this.$store.dispatch('getCurrencies');
             this.$store.dispatch('getCart');
