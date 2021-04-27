@@ -20,7 +20,7 @@
                             {{ product.quantity }}
                             <span class="pointer p-1" @click="cartIncrease(), product.quantity++">+</span>
                             <i class="fas fa-times"></i>
-                            <span v-html="icon"></span> {{ (product.discount_fixed ? product.price - product.discount_fixed : product.price) * rate }} = <span><span v-html="icon"></span>{{ (quantity * (product.price - product.discount_fixed)) * rate | currency }}</span>
+                            <span v-html="icon"></span>{{ (product.discount_fixed ? product.price - product.discount_fixed : product.price) * rate | currency}} = <span><span v-html="icon"></span>{{ (product.quantity * (product.price - product.discount_fixed)) * rate | currency }}</span>
                         </h5>
                         <button @click="deleteCart(key)">
                             <i class="fas fa-times"></i>
@@ -54,7 +54,7 @@
                         </tr>
                         </tbody>
                     </table>
-                    <router-link to="/cart" class="cta-grey-btn">View Cart</router-link>
+                    <router-link to="/cart" class="cta-grey-btn" v-if="!cartUpdate">View Cart</router-link>
                     <router-link to="/checkout" @click="cartShow = !cartShow" class="cta-blue-btn" v-if="!cartUpdate">Checkout</router-link>
                     <button type="button" @click="$route.path !== '/checkout' ? updateCart():''" class="cta-blue-btn" v-if="cartUpdate">
                         Update Cart
@@ -98,22 +98,22 @@
                                         <ul>
                                             <li>
                                                 <router-link to="/dashboard">
-                                                    <i class="fas fa-tachometer-alt"></i>Dashboard
+                                                    <i class="fas fa-tachometer-alt mr-1"></i>Dashboard
                                                 </router-link>
                                             </li>
                                             <li>
                                                 <router-link to="/edit-profile">
-                                                    <i class="far fa-edit"></i> Edit Profile
+                                                    <i class="far fa-edit mr-1"></i> Edit Profile
                                                 </router-link>
                                             </li>
                                             <li>
                                                 <router-link to="/order-history">
-                                                    <i class="fas fa-history"></i> Order History
+                                                    <i class="fas fa-history mr-1"></i> Order History
                                                 </router-link>
                                             </li>
                                             <li>
                                                 <button @click="logout">
-                                                    <i class="fas fa-sign-out-alt"></i> Log Out
+                                                    <i class="fas fa-sign-out-alt mr-1"></i> Log Out
                                                 </button>
                                             </li>
                                         </ul>
@@ -168,23 +168,9 @@
                         <div class="col-lg-8">
                             <div class="header-search">
                                 <form class="search">
-                                    <select class="search-categories form-select" style="background-image: url('/images/download.svg')">
+                                    <select class="search-categories form-select" style="background-image: url('/images/download.svg')" v-model="selectCategory">
                                         <option value="" selected>All Categories</option>
-                                        <option value="instruments">Instruments</option>
-                                        <option value="power-tools">Power Tools</option>
-                                        <option value="hand-tools">Hand Tools</option>
-                                        <option value="machine-tools">Machine Tools</option>
-                                        <option value="power-machinery">Power Machinery</option>
-                                        <option value="measurement">Measurement</option>
-                                        <option value="clothes-and-ppe">Clothes and PPE</option>
-                                        <option value="electronics">Electronics</option>
-                                        <option value="computers">Computers</option>
-                                        <option value="automotive">Automotive</option>
-                                        <option value="furniture-appliances">
-                                            Furniture &amp; Appliances
-                                        </option>
-                                        <option value="music-books">Music &amp; Books</option>
-                                        <option value="health-beauty">Health &amp; Beauty</option>
+                                        <option :value="category.id" v-for="(category, key) in categories" :key="key">{{category.name}}</option>
                                     </select>
                                     <input type="text" placeholder="Search.." name="search"/>
                                     <input type="submit" value="Search"/>
@@ -328,8 +314,8 @@
     export default {
         data() {
             return {
-                quantity: '',
-                menu: '',
+                categories: [],
+                selectCategory: '',
                 cartInfo: [],
                 cartUpdate: false,
                 cartShow: false,
@@ -347,6 +333,16 @@
                 ()=>{
                     Fire.$emit('error', 'Something Wrong! Please try Again');
                     this.$progress.fail();
+                });
+            },
+
+            //Load all category
+            headerCategory(){
+                axios.get('/api/all-categories').then(response=>{
+                    this.categories = response.data;
+                },
+                ()=>{
+                    Fire.$emit('error', 'Something Wrong! Please try Again');
                 });
             },
 
@@ -427,6 +423,10 @@
             icon(){
                 return this.$store.state.currency.icon;
             },
+        },
+
+        created(){
+            this.headerCategory();
         },
 
         watch: {

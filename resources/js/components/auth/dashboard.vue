@@ -23,18 +23,18 @@
                                     <router-link to="/edit-profile">Edit Profile</router-link>
                                 </div>
                             </div>
-                            <div class="col-lg-6" v-if="Object.keys(user).length > 0">
-                                <div class="address" v-if="user.shipping_addresses.length > 0">
+                            <div class="col-lg-6">
+                                <div class="address" v-if="shippingAddress.length > 0">
                                     <h6 class="bg-blue color-white">Shipping Address</h6>
                                     <div class="address-name">
-                                        <h3>{{user.shipping_addresses[0].address_name}}</h3>
-                                        <p><small>Address: </small>{{user.shipping_addresses[0].address + ', ' + user.shipping_addresses[0].shipping_cost.town + '(' + user.shipping_addresses[0].shipping_cost.zip + ')'}}</p>
+                                        <h3>{{shippingAddress[0].address_name}}</h3>
+                                        <p><small>Address: </small>{{shippingAddress[0].address + ', ' + shippingAddress[0].shipping_cost.town + '(' + shippingAddress[0].shipping_cost.zip + ')'}}</p>
                                     </div>
                                     <div class="address-phone">
-                                        <p><small>Phone: </small>{{user.shipping_addresses[0].phone}}</p>
+                                        <p><small>Phone: </small>{{shippingAddress[0].phone}}</p>
                                     </div>
                                     <div class="address-email">
-                                        <p><small>Email: </small>{{user.shipping_addresses[0].email}}</p>
+                                        <p><small>Email: </small>{{shippingAddress[0].email}}</p>
                                     </div>
                                     <router-link to="shipping-address" class="cta-blue-btn">Edit Address</router-link>
                                 </div>
@@ -88,6 +88,7 @@
         data() {
             return {
                 user: {},
+                shippingAddress:[],
                 orders:[]
             };
         },
@@ -96,7 +97,8 @@
             // Load Auth User Data
             loadUser() {
                 axios.get('api/user').then(response => {
-                    this.user = response.data;
+                    this.user = response.data.user;
+                    this.shippingAddress = response.data.shippingAddresses;
                 });
             },
 

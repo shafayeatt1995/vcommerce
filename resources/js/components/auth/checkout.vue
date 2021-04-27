@@ -1,5 +1,5 @@
 <template>
-    <div class="shopping-cart" v-if="$middleware.authCheck()">
+    <div class="shopping-cart">
         <div v-if="carts.length > 0" class="container">
             <div class="section-title">
                 <div class="row">
@@ -11,20 +11,21 @@
             <hr/>
             <div class="shopping-cart-body">
                 <div class="shopping-cart-info">
+                    <h5 v-if="!$middleware.authCheck()">Placed a order! Please <router-link to="/login">Login</router-link> / <router-link to="/register">Register</router-link> Now</h5>
                     <form class="row" @submit.prevent="order">
                         <div class="col-lg-7">
                             <div class="row min-h-100">
-                                <div class="col-md-12 h-100">
+                                <div class="col-md-12 h-100 mb-2">
                                     <div class="shopping-cart-coupon">
                                         <input @input="coupon.code = $event.target.value.toUpperCase()" @click.right.prevent @copy.prevent @paste.prevent :value="coupon.code" @keydown.space.prevent type="text" @keydown.enter.prevent="applyCoupon" class="text-uppercase" :class="{'is-invalid': form.errors.has('code')}" :placeholder="form.couponUse ? 'Coupon Successfully Use':'Type Your Coupon'" :disabled="form.couponUse"/>
-                                        <button type="button" @click="applyCoupon" class="cta-blue-btn" :disabled="form.couponUse">Apply Coupon <i class="far fa-check-circle" v-if="form.couponUse"></i></button>
+                                        <button type="button" @click="form.couponUse ? removeCoupon() : applyCoupon()" :class="form.couponUse ? 'cta-red-btn':'cta-blue-btn'">{{ form.couponUse ? 'Remove Coupon' : 'Apply Coupon' }}</button>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="address">
                                         <h6 class="bg-blue color-white">Shipping Address</h6>
                                         <div class="form-group mt-3">
-                                            <select class="form-control form-select" v-model="form.selectAddress" style="background-image: url('/images/download.svg')" required>
+                                            <select class="form-control form-select" v-model="form.selectAddress" @change="addressChange" style="background-image: url('/images/download.svg')" required>
                                                 <option :value="null">Select a Address</option>
                                                 <option v-for="data in addresses" :value="data" :key="data.id">{{ data.address_name }}</option>
                                             </select>
@@ -126,41 +127,46 @@
                                     </li>
                                     <li>
                                         <p>Shipping Fee:
-                                            <span class="text-right">{{(form.selectAddress === null ? '0' : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price) * rate | currency}}</span>
+                                            <span class="text-right">{{((form.selectAddress === null ? '0' : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price) * carts.length) * rate | currency}}</span>
                                             <span class="text-right mr-1" v-html="icon"></span>
                                         </p>
                                     </li>
                                     <hr/>
                                     <li class="shopping-cart-total">
-                                        <h4>Total: <span class="text-right" v-if="form.couponUse">{{((parseFloat(cartPrice) + parseFloat(form.selectAddress === null ? "0" : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price)) - parseInt(form.cartCoupon.fixed_offer !== null ? form.cartCoupon.fixed_offer : (cartPrice * form.cartCoupon.percent_offer) / 100)) * rate | currency}}</span>
-                                            <span class="text-right" v-else>{{(parseFloat(cartTotal) + parseFloat(form.selectAddress === null ? "0" : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price)) * rate | currency}}</span>
+                                        <h4>Total Price: <span class="text-right" v-if="form.couponUse">{{((cartPrice + (form.selectAddress === null ? '0' : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price) * carts.length) - (form.cartCoupon.fixed_offer !== null ? form.cartCoupon.fixed_offer : (cartPrice * form.cartCoupon.percent_offer) / 100)) * rate | currency}}</span>
+                                            <span class="text-right" v-else>{{(cartTotal + (form.selectAddress === null ? "0" : form.shippingType == true ? form.selectAddress.shipping_cost.normal_price : form.selectAddress.shipping_cost.express_price) * carts.length) * rate | currency}}</span>
                                             <span class="text-right mr-1" v-html="icon"></span>
                                         </h4>
                                     </li>
                                 </ul>
-                                <div class="payment-methods">
-                                    <p>Select a Payment Method:</p>
-                                    <ul class="mt-0">
-                                        <li>
-                                            <input type="radio" id="cod" name="payment-method" value="cod" @click="paymentReset" v-model="form.paymentType"/>
-                                            <label for="cod">Cash On Delivery</label>
-                                        </li>
-                                        <li>
-                                            <input type="radio" id="stripe" name="payment-method" value="stripe" @click="paymentReset" v-model="form.paymentType"/>
-                                            <label for="stripe">Card Payment</label>
-                                        </li>
-                                        <li>
-                                            <input type="radio" id="paypal" name="payment-method" value="paypal" @click="paymentReset" v-model="form.paymentType"/>
-                                            <label for="paypal">Paypal</label>
-                                        </li>
-                                        <li>
-                                            <input type="radio" id="bkash" name="payment-method" value="bkash" @click="paymentReset" v-model="form.paymentType"/>
-                                            <label for="bkash">Bkash</label>
-                                        </li>
-                                    </ul>
-                                </div>
-                                <transition name="slide">
-                                    <div class="stript-payment" v-if="form.paymentType == 'stripe'">
+                                <transition name="slide" mode="out-in">
+                                    <div class="payment-methods" v-if="form.selectAddress !== null" :key="'1'">
+                                        <p>Select a Payment Method:</p>
+                                        <ul class="mt-0">
+                                            <li>
+                                                <input type="radio" id="cod" name="payment-method" value="cod" @click="paymentReset" v-model="form.paymentType"/>
+                                                <label for="cod">Cash On Delivery</label>
+                                            </li>
+                                            <li>
+                                                <input type="radio" id="stripe" name="payment-method" value="stripe" @click="paymentReset" v-model="form.paymentType"/>
+                                                <label for="stripe">Card Payment</label>
+                                            </li>
+                                            <li>
+                                                <input type="radio" id="paypal" name="payment-method" value="paypal" @click="paymentReset" v-model="form.paymentType"/>
+                                                <label for="paypal">Paypal</label>
+                                            </li>
+                                            <li>
+                                                <input type="radio" id="bkash" name="payment-method" value="bkash" @click="paymentReset" v-model="form.paymentType"/>
+                                                <label for="bkash">Bkash</label>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="payment-methods" :key="'2'" v-else>
+                                        <p>Please Select Shipping Address & Billing Address</p>
+                                    </div>
+                                </transition>
+                                <transition name="slide" mode="out-in">
+                                    <div class="stript-payment" v-if="form.paymentType == 'stripe'" :key="'1'">
                                         <div class="row">
                                             <div class="form-group col-lg-12">
                                                 <label for="card">Card Number</label>
@@ -176,10 +182,14 @@
                                             </div>
                                         </div>
                                     </div>
+                                    <div v-if="form.paymentType == 'paypal'" :key="'2'">
+                                        <h2>Paypal</h2>
+                                        <!--<div class="mx-auto w-50" :ref="'paypal'"></div>-->
+                                    </div>
                                 </transition>
                                 <hr/>
                                 <div class="agreement">
-                                    <input type="checkbox" id="agrement" v-model="agree" @click="agree = !agree"/>
+                                    <input type="checkbox" id="agrement" v-model="agree" @click="agree = $middleware.authCheck() ? !agree:''"/>
                                     <label for="agrement">I have read and agree to the website <router-link to="/terms-condition">terms and conditions</router-link></label>
                                 </div>
                                 <button type="submit" :disabled="!agree">Placed To Order</button>
@@ -193,9 +203,6 @@
             <img src="/images/cart-empty.png" alt="Your Cart is Empty" class="img-fluid h-350">
             <h4 class="mt-3">Your Cart is Empty</h4>
         </div>
-    </div>
-    <div v-else>
-        <error></error>
     </div>
 </template>
 
@@ -221,6 +228,8 @@
                     couponUse: false,
                     shippingType: true,
                     paymentType: 'cod',
+                    cart: this.$store.state.carts,
+                    currency: this.$store.state.currency,
                 }),
                 coupon: new Form({
                     code: ''
@@ -237,40 +246,54 @@
                 if (this.$middleware.authCheck()) {
                     this.$Progress.start();
                     axios.get('api/shipping-address').then(response => {
-                        this.addresses = response.data;
-                        this.$Progress.finish();
-                    },
-                    () => {
-                        Fire.$emit('error', 'Something Wrong! Please try Again');
-                        this.$Progress.fail();
-                    });
+                            this.addresses = response.data;
+                            this.form.selectAddress = response.data[0];
+                            this.form.billingStatus = true;
+                            this.$Progress.finish();
+                        },
+                        () => {
+                            Fire.$emit('error', 'Something Wrong! Please try Again');
+                            this.$Progress.fail();
+                        });
                 }
             },
 
             // Apply Coupon
             applyCoupon(){
                 this.coupon.post('/api/cart/coupon').then(response => {
-                    if (Object.keys(response.data).length !== 0) {
-                        if (response.data.message) {
-                            this.coupon.reset();
-                            Fire.$emit('info', response.data.message);
-                        } else {
-                            if (this.cartPrice >= response.data.target_price) {
-                                this.form.cartCoupon = response.data;
-                                this.form.couponUse = true;
+                        if (Object.keys(response.data).length !== 0) {
+                            if (response.data.message) {
                                 this.coupon.reset();
-                                Fire.$emit('success', 'Coupon Use Successfully');
+                                Fire.$emit('info', response.data.message);
                             } else {
-                                Fire.$emit('info', 'You Need To Purchase More to Use This Coupon');
+                                if (this.cartPrice >= response.data.target_price) {
+                                    this.form.cartCoupon = response.data;
+                                    this.form.couponUse = true;
+                                    this.coupon.reset();
+                                    Fire.$emit('success', 'Coupon Use Successfully');
+                                } else {
+                                    Fire.$emit('info', 'You Need To Purchase More to Use This Coupon');
+                                }
                             }
+                        } else {
+                            Fire.$emit('error', 'Please Use valid Coupon');
                         }
-                    } else {
-                        Fire.$emit('error', 'Please Use valid Coupon');
-                    }
-                },
-                error => {
-                    Fire.$emit('error', error.response.data.message);
-                })
+                    },
+                    error => {
+                        Fire.$emit('error', error.response.data.message);
+                    })
+            },
+
+            // Remove Coupon
+            removeCoupon(){
+                this.form.cartCoupon = {};
+                this.form.couponUse = false;
+                Fire.$emit('success', 'Coupon Remove Successfully');
+            },
+
+            // Shipping Address Change
+            addressChange(){
+                this.form.selectAddress === null ? this.form.billingStatus = false : '';
             },
 
             // Payment Option Reset
@@ -283,17 +306,22 @@
             // Place A new Order
             order(){
                 this.$Progress.start();
-                this.form.post('/api/order').then(response => {
-                    this.$store.dispatch('getCart');
-                    this.$router.push('/checkout-success/' + response.data);
-                    Fire.$emit('success', 'We Are Received Your Order Successfully');
-                    this.$Progress.finish();
-                },
-                error => {
-                    Fire.$emit('error', error.response.data.message ? error.response.data.message:'Something Wrong! Please try Again');
+                if (this.$middleware.authCheck()) {
+                    this.form.post('/api/order', this.carts).then(response => {
+                            this.$store.dispatch('deleteAllCart');
+                            this.$router.push('/checkout-success/' + response.data);
+                            Fire.$emit('success', 'We Are Received Your Order Successfully');
+                            this.$Progress.finish();
+                        },
+                        error => {
+                            Fire.$emit('error', error.response.data.message ? error.response.data.message : 'Something Wrong! Please try Again');
+                            this.$Progress.fail();
+                        })
+                } else {
+                    this.$router.push('/login');
                     this.$Progress.fail();
-                })
-            }
+                }
+            },
         },
 
         computed: {
@@ -335,14 +363,7 @@
         },
 
         created() {
-            this.$Progress.start();
-            if (this.$middleware.authCheck()) {
-                this.getAddress();
-            } else {
-                Fire.$emit('info', "Please Login For Checkout");
-                this.$router.push('/login');
-                this.$Progress.fail();
-            }
+            this.getAddress();
         },
     };
 </script>

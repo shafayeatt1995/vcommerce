@@ -47,4 +47,10 @@ class CategoryController extends Controller
         $this->authorize('admin');
         $category->delete();
     }
+
+    public function allCategories()
+    {
+        $categories = Category::all();
+        return response()->json($categories);
+    }
 }

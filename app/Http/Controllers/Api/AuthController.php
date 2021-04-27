@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\ShippingAddress;
+use App\Models\Store;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +17,11 @@ class AuthController extends Controller
 {
     public function user()
     {
-        return auth('api')->check() ? auth('api')->user()->with('store','shippingAddresses','shippingAddresses.shippingCost')->first():false;
+        $user = auth('api')->user();
+        $store = Store::find($user->id);
+        $shippingAddresses = ShippingAddress::where('user_id', $user->id)->with('shippingCost')->latest()->get();
+
+        return response()->json(compact('user','store','shippingAddresses'));
     }
 
     public function updateUser(Request $request)

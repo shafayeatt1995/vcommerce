@@ -22,7 +22,7 @@ class CreateShippingAddressesTable extends Migration
             $table->string('address');
             $table->string('phone');
             $table->string('email')->nullable();
-            $table->boolean('address_type')->comment('True = shipping address & False = billing address');
+            $table->boolean('default');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('shipping_cost_id')->references('id')->on('shipping_costs')->onDelete('cascade');
             $table->timestamps();

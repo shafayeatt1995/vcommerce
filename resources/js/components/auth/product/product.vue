@@ -101,16 +101,16 @@
                                                             </td>
                                                         </tr>
                                                         <tr v-if="data.discount_fixed">
+                                                            <td class="border-none">Discount Percent:</td>
+                                                            <td class="border-none">
+                                                                {{ data.discount_percent }}%
+                                                            </td>
+                                                        </tr>
+                                                        <tr v-if="data.discount_fixed">
                                                             <td class="border-none">Current Price:</td>
                                                             <td class="border-none">
                                                                 <span v-html="icon"></span>
                                                                 {{ (data.price - data.discount_fixed) * rate | currency }}
-                                                            </td>
-                                                        </tr>
-                                                        <tr v-if="data.discount_fixed">
-                                                            <td class="border-none">Discount Percent:</td>
-                                                            <td class="border-none">
-                                                                {{ data.discount_percent }}%
                                                             </td>
                                                         </tr>
                                                     </table>

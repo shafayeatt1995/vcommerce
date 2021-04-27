@@ -41,6 +41,7 @@
                                         </div>
                                         <button class="cta-blue-btn" @click="editData(address)">Edit Shipping Address</button>
                                         <button class="cta-red-btn" @click="deleteData(address.id)"><i class="fas fa-trash-alt"></i></button>
+                                        <button :class="address.default ? 'cta-green-btn' : 'cta-grey-btn'" @click="setDefault(address.id)"><i class="fas fa-check-circle"></i></button>
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +75,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="town">Town</label>
-                                <select class="form-control form-select" id="town" v-model="form.shipping_cost_id" :class="{ 'is-invalid': form.errors.has('shipping_cost_id') }" required>
+                                <select class="form-control form-select" id="town" v-model="form.shipping_cost_id" :class="{ 'is-invalid': form.errors.has('shipping_cost_id') }" style="background-image: url('/images/download.svg')" required>
                                     <option value="n">Select A Town</option>
                                     <option v-for="data in shippingCost" :value="data.id" :key="data.id">{{ data.town + " (" + data.zip + ")" }}</option>
                                 </select>
@@ -260,6 +261,19 @@
                     });
                 }
             },
+
+            setDefault(id){
+                this.$Progress.start();
+                axios.post('/api/shipping-address-default/'+id).then(()=>{
+                    Fire.$emit('getShippingAddress');
+                    Fire.$emit('success', 'Default Address Successfully Change');
+                    this.$Progress.finish();
+                },
+                ()=>{
+                    Fire.$emit('error', 'Something Wrong! Please try Again');
+                    this.$Progress.fail();
+                })
+            },
         },
 
         created() {
@@ -268,6 +282,10 @@
                 this.loadShippingAddress();
                 this.getShippingCost();
                 this.$Progress.finish();
+
+                Fire.$on('getShippingAddress',()=>{
+                    this.loadShippingAddress();
+                })
             }else{
                 this.$router.push('/login');
                 this.$Progress.fail();

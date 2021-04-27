@@ -8,13 +8,10 @@
                 <h5>
                     Do You Want to Upgrade Your Business With Us And Get More Customer?
                 </h5>
-                <button @click="storeForm = !storeForm" class="cta-blue-btn">
-                    Create Your Store
-                </button>
             </div>
         </div>
         <transition name="slide">
-            <form @submit.prevent="createStore" v-if="storeForm" class="mt-5">
+            <form @submit.prevent="createStore" class="mt-5">
                 <div class="form-group row mb-3">
                     <label for="name" class="col-lg-2">Store Name</label>
                     <input v-model="form.name" type="text" class="form-control col-lg-10" id="name" :class="{ 'is-invalid': form.errors.has('name') }" placeholder="Type Your Store Name" required/>
@@ -78,7 +75,6 @@
                     map: '',
                     description: '',
                 }),
-                storeForm: false,
                 store: false,
                 loading: true,
             };

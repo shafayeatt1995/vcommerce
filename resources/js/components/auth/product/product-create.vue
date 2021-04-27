@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard" v-if="$middleware.adminOrSeller()">
         <!--Dashboard area start -->
-        <div class="container">
+        <div class="dashboard-container container">
             <div class="section-title">
                 <div class="row">
                     <div class="col-lg-12">
@@ -452,14 +452,14 @@
                 if (this.$middleware.adminOrSeller()) {
                     this.$Progress.start();
                     axios.get('/api/product/create').then(response => {
-                        this.brands = response.data.brands;
-                        this.categories = response.data.categories;
-                        this.$Progress.finish();
-                    },
-                    ()=> {
-                        Fire.$emit('error', 'Something Wrong! Please try Again');
-                        this.$Progress.fail();
-                    });
+                            this.brands = response.data.brands;
+                            this.categories = response.data.categories;
+                            this.$Progress.finish();
+                        },
+                        ()=> {
+                            Fire.$emit('error', 'Something Wrong! Please try Again');
+                            this.$Progress.fail();
+                        });
                 }
             },
 
@@ -473,22 +473,22 @@
                 if (event.target.value !== '') {
                     this.subCategoryLoading = true;
                     axios.post('/api/product/getSubCategory/' + event.target.value).then(response => {
-                        if (response.data.length >= 0) {
-                            this.subCategories = response.data;
-                            this.subCategoryType = true;
-                            this.subCategoryLoading = false;
-                        } else {
+                            if (response.data.length >= 0) {
+                                this.subCategories = response.data;
+                                this.subCategoryType = true;
+                                this.subCategoryLoading = false;
+                            } else {
+                                this.subCategories = null;
+                                this.subCategoryType = false;
+                                this.subCategoryLoading = false;
+                            }
+                        },
+                        () => {
                             this.subCategories = null;
                             this.subCategoryType = false;
                             this.subCategoryLoading = false;
-                        }
-                    },
-                    () => {
-                        this.subCategories = null;
-                        this.subCategoryType = false;
-                        this.subCategoryLoading = false;
-                        Fire.$emit('error', 'Something Wrong! Please try Again');
-                    });
+                            Fire.$emit('error', 'Something Wrong! Please try Again');
+                        });
                 } else {
                     this.subCategories = null;
                     this.subCategoryType = false;
@@ -520,13 +520,13 @@
             imagePreview() {
                 this.$Progress.start();
                 axios.get('/api/get-image/product').then(response => {
-                    this.productImages = response.data;
-                    this.$Progress.finish();
-                },
-                () => {
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+                        this.productImages = response.data;
+                        this.$Progress.finish();
+                    },
+                    () => {
+                        Fire.$emit('error', 'Something Wrong! Please try Again');
+                        this.$Progress.fail();
+                    });
             },
 
             // Deleting Multiple Product Image
@@ -536,11 +536,11 @@
                     Fire.$emit('getProductImage');
                     this.loading = false;
                 })
-                .catch(() => {
-                    this.loading = false;
-                    Fire.$emit('error', 'Something Wrong! Please try Again');
-                    this.$Progress.fail();
-                });
+                    .catch(() => {
+                        this.loading = false;
+                        Fire.$emit('error', 'Something Wrong! Please try Again');
+                        this.$Progress.fail();
+                    });
             },
 
             // Add Or Remove Color Option
@@ -600,15 +600,15 @@
                     if (this.form.variants.length > 0) {
                         if (this.form.descriptions.length > 0) {
                             if (this.form.specification.length > 0) {
-                            this.form.post('/api/product').then(() => {
-                                Fire.$emit('success', 'Product Successfully Created');
-                                this.$Progress.finish();
-                                this.$router.push('/product');
-                            },
-                            error => {
-                                Fire.$emit('error', error.response.data.errors ? error.response.data.errors[Object.keys(error.response.data.errors)[0]][0]:'Something Wrong! Please try Again');
-                                this.$Progress.fail();
-                            });
+                                this.form.post('/api/product').then(() => {
+                                        Fire.$emit('success', 'Product Successfully Created');
+                                        this.$Progress.finish();
+                                        this.$router.push('/product');
+                                    },
+                                    error => {
+                                        Fire.$emit('error', error.response.data.errors ? error.response.data.errors[Object.keys(error.response.data.errors)[0]][0]:'Something Wrong! Please try Again');
+                                        this.$Progress.fail();
+                                    });
                             }else{
                                 Fire.$emit('error', 'Product Specification Required');
                                 this.$Progress.fail()

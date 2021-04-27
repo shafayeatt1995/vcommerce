@@ -18,13 +18,13 @@
                             <p>Login with your social network, Note: Laracommerce will neverpost any content to your social pages.</p>
                             <ul>
                                 <li>
-                                    <a href="#" class="bg-red"><i class="fab fa-google"></i> Google</a>
+                                    <a href="api/auth/google/redirect" class="bg-red"><i class="fab fa-google"></i> Google</a>
                                 </li>
                                 <li>
-                                    <a href="#" class="bg-blue"><i class="fab fa-facebook-f"></i> Facebook</a>
+                                    <a href="api/auth/facebook/redirect" class="bg-blue"><i class="fab fa-facebook-f"></i> Facebook</a>
                                 </li>
                                 <li>
-                                    <a href="#" class="bg-ltblue"><i class="fab fa-twitter"></i> Twitter</a>
+                                    <a href="api/auth/twitter/redirect" class="bg-ltblue"><i class="fab fa-twitter"></i> Twitter</a>
                                 </li>
                             </ul>
                             <div class="form-divider">
@@ -98,10 +98,14 @@
                         this.loading = false;
                         this.$router.go('/dashboard');
                     },
-                    () => {
-                        this.loading = false;
-                    });
+                () => {
+                    this.loading = false;
+                });
             },
+
+//            githubLogin(){
+//                this.$router.go('api/auth/github/redirect');
+//            },
         },
 
         created() {

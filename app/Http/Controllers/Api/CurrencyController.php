@@ -12,7 +12,7 @@ class CurrencyController extends Controller
     public function index()
     {
         $currency = Currency::where('default', true)->first();
-        $currencies = Currency::orderBy('name')->get();
+        $currencies = Currency::orderBy('country')->get();
         return response()->json(compact('currency', 'currencies'));
     }
 
@@ -27,8 +27,10 @@ class CurrencyController extends Controller
 
         $currency = new Currency();
         $currency->icon = $request->icon;
+        $currency->country = $request->country;
         $currency->name = $request->name;
         $currency->rate = $request->rate;
+        $currency->default = Currency::count() > 0 ? false:true;
         $currency->save();
     }
 
@@ -42,6 +44,7 @@ class CurrencyController extends Controller
         ]);
 
         $currency->icon = $request->icon;
+        $currency->country = $request->country;
         $currency->name = $request->name;
         $currency->rate = $request->rate;
         $currency->save();

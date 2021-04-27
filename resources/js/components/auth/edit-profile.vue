@@ -29,7 +29,7 @@
                                         <a data-toggle="tab" href="#user-store" aria-selected="false" @click.right.prevent><i class="fas fa-store-alt"></i> Store</a>
                                     </li>
                                     <li>
-                                        <a data-toggle="tab" href="#user-password" aria-selected="false" @click.right.prevent><i class="fas fa-key"></i> Password</a>
+                                        <a data-toggle="tab" href="#user-password" aria-selected="false" @click.right.prevent v-if="!socialAccount"><i class="fas fa-key"></i> Password</a>
                                     </li>
                                 </ul>
                                 <div class="tab-content edit-user-content p-2">
@@ -103,7 +103,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="tab-pane fade" id="user-password">
+                                    <div class="tab-pane fade" id="user-password" v-if="!socialAccount">
                                         <form @submit.prevent="updatePassword">
                                             <div class="form-group">
                                                 <label for="old-password">Old Password</label>
@@ -168,6 +168,7 @@
                 oldPassword:false,
                 newPassword:false,
                 confirmPassword:false,
+                socialAccount: true,
             };
         },
 
@@ -175,9 +176,10 @@
             //Get Authenticate User Data
             getUser() {
                 axios.get('api/user').then(response => {
-                    this.user.name = response.data.name;
-                    this.user.image = response.data.image;
-                    if (response.data.store) {
+                    this.user.name = response.data.user.name;
+                    this.user.image = response.data.user.image;
+                    this.socialAccount = response.data.user.social_account;
+                        if (response.data.store) {
                         this.form.name = response.data.store.name;
                         this.form.image = response.data.store.logo;
                         this.form.address = response.data.store.address;

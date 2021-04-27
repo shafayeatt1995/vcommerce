@@ -108,6 +108,11 @@ import Vue2Editor from "vue2-editor";
 Vue.use(Vue2Editor);
 
 
+// Vue Tool Tip
+import VTooltip from 'v-tooltip'
+Vue.use(VTooltip);
+
+
 /**
  * The following block of code may be used to automatically register your
  * Vue components. It will recursively scan this directory for the Vue
@@ -129,6 +134,7 @@ Vue.component('header-view', require('./components/app/partials/header').default
 Vue.component('footer-view', require('./components/app/partials/footer').default);
 Vue.component('sidebar', require('./components/app/partials/sidebar').default);
 Vue.component('product', require('./components/app/product').default);
+Vue.component('quick-view', require('./components/app/quick-vue').default);
 Vue.component('store-create', require('./components/app/storeCreate').default);
 Vue.component('wishlist', require('./components/app/wishlist').default);
 Vue.component('loading', require('./components/app/loading').default);

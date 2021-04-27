@@ -8,8 +8,6 @@
         "hot": "cross-env NODE_ENV=development node_modules/webpack-dev-server/bin/webpack-dev-server.js --inline --hot --disable-host-check --config=node_modules/laravel-mix/setup/webpack.config.js",
         "prod": "npm run production",
         "production": "cross-env NODE_ENV=production node_modules/webpack/bin/webpack.js --no-progress --config=node_modules/laravel-mix/setup/webpack.config.js"
-
-
     },
     "devDependencies": {
         "axios": "^0.21.1",
@@ -28,11 +26,13 @@
     },
     "dependencies": {
         "@fortawesome/fontawesome-free": "^5.15.1",
+        "@popperjs/core": "^2.9.2",
         "base-64": "^1.0.0",
         "laravel-vue-pagination": "^2.3.1",
         "moment": "^2.29.1",
         "node": "^15.10.0",
         "sweetalert2": "^10.15.6",
+        "v-tooltip": "^2.1.3",
         "v-viewer": "^1.5.1",
         "vform": "^1.0.1",
         "vue-owl-carousel": "^2.0.3",

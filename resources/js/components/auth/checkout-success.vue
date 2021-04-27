@@ -58,25 +58,29 @@
                                         <td colspan="6" class="text-left order-success-ammount">
                                             <ul>
                                                 <li>
-                                                    <p>Subtotal: <span v-html="iocn"></span> <span>{{order.price * rate | currency}}</span></p>
-                                                </li>
-                                                <li>
                                                     <p>
-                                                        Coupon: <span v-html="icon"></span> <span>{{(order.coupon !== null ? order.coupon : '0') * rate | currency}}</span>
+                                                        Subtotal: <span>{{order.price * rate | currency}}</span> <span v-html="icon"></span>
                                                     </p>
                                                 </li>
                                                 <li>
                                                     <p>
-                                                        Discount: <span v-html="icon"></span> <span>{{(order.coupon !== null ? '0' : order.discount) * rate | currency}}</span>
+                                                        Coupon: <span>{{(order.coupon !== null ? order.coupon : '0') * rate | currency}}</span> <span v-html="icon"></span>
                                                     </p>
                                                 </li>
                                                 <li>
-                                                    <p>Shipping Fee: <span v-html="icon"></span> <span>{{order.shipping_fee * rate| currency}}</span>
+                                                    <p>
+                                                        Discount: <span>{{(order.coupon !== null ? '0' : order.discount) * rate | currency}}</span> <span v-html="icon"></span>
+                                                    </p>
+                                                </li>
+                                                <li>
+                                                    <p>Shipping Fee: <span>{{order.shipping_fee * rate| currency}}</span> <span v-html="icon"></span>
                                                     </p>
                                                 </li>
                                                 <hr>
                                                 <li>
-                                                    <h4>Total: <span v-html="icon"></span> <span>{{order.total_price * rate | currency}}</span></h4>
+                                                    <h4>
+                                                        Total: <span>{{order.total_price * rate | currency}}</span> <span v-html="icon"></span>
+                                                    </h4>
                                                 </li>
                                             </ul>
                                         </td>
@@ -132,7 +136,7 @@
                         </div>
                         <div class="checkbox-success-cta">
                             <router-link to="/" class="cta-grey-btn">Back To Home</router-link>
-                            <a href="#" class="cta-blue-btn">Continue Shopping</a>
+                            <router-link to="/" class="cta-blue-btn">Continue Shopping</router-link>
                         </div>
                     </div>
                     <!--Checkout success top end-->

@@ -12,6 +12,8 @@
 
         <footer-view></footer-view>
 
+        <quick-view></quick-view>
+
         <vue-progress-bar></vue-progress-bar>
     </div>
 </template>

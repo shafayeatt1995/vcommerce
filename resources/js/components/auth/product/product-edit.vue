@@ -1,7 +1,7 @@
 <template>
     <div class="dashboard" v-if="$middleware.adminOrSeller()">
         <!-- Dashboard area start -->
-        <div class="container">
+        <div class="dashboard-container container">
             <div class="section-title">
                 <div class="row">
                     <div class="col-lg-12">
@@ -84,7 +84,7 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Product Description <span class="small" title="For using image in description then first upload your image in server like Google Drive or any cloud storage and click right button in the image and click copy image then past in the text editor or use html <img/> tag">(Need Help? Hover Me)</span></label>
+                                        <label>Product Description <span class="small" v-tooltip.top-center="'For using image in description then first upload your image in server like Google Drive or any cloud storage and click right button in the image and click copy image then past in the text editor or use html img tag'">(Need Help? Hover Me)</span></label>
                                         <vue-editor v-model="form.description"></vue-editor>
                                     </div>
 

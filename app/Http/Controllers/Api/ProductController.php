@@ -355,9 +355,9 @@ class ProductController extends Controller
 
     public function getProduct($slug)
     {
-        $product = Product::active()->status()->where('slug', $slug)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user','reviews')->first();
+        $product = Product::active()->status()->where('slug', $slug)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user', 'orders')->withCount('orders','reviews')->first();
         if(isset($product)){
-            $products = Product::active()->status()->where('sub_category_id', $product->sub_category_id)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user')->inRandomOrder()->take(10)->get();
+            $products = Product::active()->status()->where('sub_category_id', $product->sub_category_id)->with('brand', 'category', 'subCategory', 'productImages', 'featureDescriptions', 'specifications', 'colors', 'variants', 'user', 'orders')->withCount('reviews')->inRandomOrder()->take(10)->get();
             return response()->json(compact('product','products'));
         } else {
             return response()->json('product Not Found', 404);

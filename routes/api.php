@@ -6,7 +6,8 @@ use Illuminate\Support\Facades\Route;
     // All Authenticate Route
 Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
 
-    // User Route
+    // Get user information
+    Route::get('user','AuthController@user');
     Route::post('update-user','AuthController@updateUser');
     Route::post('update-password','AuthController@updatePassword');
 
@@ -33,6 +34,7 @@ Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
     Route::post('shipping-address','ShippingAddressController@store');
     Route::post('shipping-address/{shipping_address}','ShippingAddressController@update');
     Route::post('shipping-address-delete/{shipping_address}','ShippingAddressController@destroy');
+    Route::post('shipping-address-default/{shipping_address}','ShippingAddressController@setDefault');
 
     // Shipping Cost Route
     Route::get('shipping-cost','ShippingCostController@index');
@@ -105,9 +107,6 @@ Route::group(['namespace'=>'Api','middleware'=>'Auth:api'], function (){
     // All Public Route
 Route::group(['namespace'=>'Api'], function (){
 
-    // Get user information
-    Route::get('user','AuthController@user');
-
     // Currency Route
     Route::get('currency', 'CurrencyController@index');
 
@@ -123,4 +122,8 @@ Route::group(['namespace'=>'Api'], function (){
     Route::get('contact-us','SettingController@getContactUs');
     Route::get('faq','SettingController@getFaq');
     Route::get('terms','SettingController@getTerms');
+
+    // Category Related Route
+    Route::get('all-categories','CategoryController@allCategories');
+
 });

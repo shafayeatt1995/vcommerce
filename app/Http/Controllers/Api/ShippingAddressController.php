@@ -11,12 +11,14 @@ class ShippingAddressController extends Controller
 {
     public function index()
     {
+        $this->authorize('authCheck');
         $addresses = ShippingAddress::where('user_id', Auth::id())->with('shippingCost')->get();
         return response()->json($addresses);
     }
 
     public function store(Request $request)
     {
+        $this->authorize('authCheck');
         $this->validate($request,[
             'shipping_cost_id'=>'required|integer',
             'address_name'=>'required',
@@ -33,6 +35,7 @@ class ShippingAddressController extends Controller
         $address->address = $request->address;
         $address->phone = $request->phone;
         $address->email = $request->email;
+        $address->default = Auth::user()->shippingAddresses->count() > 0 ? false:true;
         $address->save();
 
         $addresses = ShippingAddress::where('user_id', Auth::id())->with('shippingCost')->get();
@@ -41,6 +44,7 @@ class ShippingAddressController extends Controller
 
     public function update(Request $request, ShippingAddress $shippingAddress)
     {
+        $this->authorize('authCheck');
         $this->validate($request,[
             'shipping_cost_id'=>'required|integer',
             'address_name'=>'required',
@@ -63,9 +67,23 @@ class ShippingAddressController extends Controller
 
     public function destroy(ShippingAddress $shippingAddress)
     {
+        $this->authorize('authCheck');
         $shippingAddress->delete();
 
         $addresses = ShippingAddress::where('user_id', Auth::id())->with('shippingCost')->get();
         return response()->json($addresses);
+    }
+
+    public function setDefault(ShippingAddress $shippingAddress)
+    {
+        $this->authorize('authCheck');
+        $oldDefault = ShippingAddress::where('default', true)->get();
+        foreach ($oldDefault as $data){
+            $data->default = false;
+            $data->save();
+        }
+        $shippingAddress->default = true;
+        $shippingAddress->save();
+
     }
 }

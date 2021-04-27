@@ -26,22 +26,24 @@
                                 <table class="table table-bordered" width="100%" >
                                     <thead>
                                     <tr>
-                                        <th class="text-center">SL No</th>
-                                        <th class="text-center">Currency Icon</th>
-                                        <th class="text-center">Currency Name</th>
-                                        <th class="text-center">Currency Exchange Rate</th>
-                                        <th class="text-center">Default Currency</th>
-                                        <th class="text-center">Action</th>
+                                        <th class="text-center align-middle">SL No</th>
+                                        <th class="text-center align-middle">Currency Icon</th>
+                                        <th class="text-center align-middle">Currency Country</th>
+                                        <th class="text-center align-middle">Currency Name</th>
+                                        <th class="text-center align-middle">Currency Exchange Rate</th>
+                                        <th class="text-center align-middle">Default Currency</th>
+                                        <th class="text-center align-middle">Action</th>
                                     </tr>
                                     </thead>
                                     <tfoot>
                                     <tr>
-                                        <th class="text-center">SL No</th>
-                                        <th class="text-center">Currency Icon</th>
-                                        <th class="text-center">Currency Name</th>
-                                        <th class="text-center">Currency Exchange Rate</th>
-                                        <th class="text-center">Default Currency</th>
-                                        <th class="text-center">Action</th>
+                                        <th class="text-center align-middle">SL No</th>
+                                        <th class="text-center align-middle">Currency Icon</th>
+                                        <th class="text-center align-middle">Currency Country</th>
+                                        <th class="text-center align-middle">Currency Name</th>
+                                        <th class="text-center align-middle">Currency Exchange Rate</th>
+                                        <th class="text-center align-middle">Default Currency</th>
+                                        <th class="text-center align-middle">Action</th>
                                     </tr>
                                     </tfoot>
                                     <tbody v-if="currencyData">
@@ -50,6 +52,9 @@
                                                 {{ key+1 }}
                                             </td>
                                             <td class="text-center align-middle strong" v-html="currency.icon"></td>
+                                            <td class="text-center align-middle">
+                                                {{ currency.country }}
+                                            </td>
                                             <td class="text-center align-middle">
                                                 {{ currency.name }}
                                             </td>
@@ -101,6 +106,11 @@
                                 <has-error :form="form" field="icon"></has-error>
                             </div>
                             <div class="form-group">
+                                <label for="country">Currency Country</label>
+                                <input v-model="form.country" type="text" id="country" class="form-control" :class="{ 'is-invalid': form.errors.has('country') }" required/>
+                                <has-error :form="form" field="country"></has-error>
+                            </div>
+                            <div class="form-group">
                                 <label for="name">Currency Name</label>
                                 <input v-model="form.name" type="text" id="name" class="form-control" :class="{ 'is-invalid': form.errors.has('name') }" required/>
                                 <has-error :form="form" field="name"></has-error>
@@ -139,6 +149,7 @@
                 form: new Form({
                    id: '',
                    icon: '',
+                   country: '',
                    name: '',
                    rate: '',
                 }),

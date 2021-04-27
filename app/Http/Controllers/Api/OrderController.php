@@ -28,23 +28,26 @@ class OrderController extends Controller
     public function create(Request $request)
     {
         $this->authorize('authCheck');
-        $carts = Cart::where('user_id', Auth::id())->with('product', 'color', 'variant')->get();
+        $products = [];
+        foreach ($request->cart as $data) {
+            array_push($products, ['product'=> Product::find($data['id']), 'cart'=> $data]);
+        }
 
         $price = 0;
-        foreach ($carts as $key => $value) {
-            $price += $value->product->price * $value->quantity;
+        foreach ($products as $key => $value) {
+            $price += $value['product']->price * $value['cart']['quantity'];
         };
 
         $discount = 0;
-        foreach ($carts as $key => $value) {
-            $discount += $value->product->discount_fixed;
+        foreach ($products as $key => $value) {
+            $discount += $value['product']['discount_fixed'];
         };
 
-        $shipping = $request->selectAddress['shipping_cost'];
         $expMonth = Str::substr($request->expire, 5);
         $expYear = Str::substr($request->expire, 0, 4);
 
-        $totalPrice = $price + ($request->shippingType === true ? $shipping['normal_price'] : $shipping['express_price']) - ($request->couponUse === true ? $request->cartCoupon['fixed_offer'] !== null ? $request->cartCoupon['fixed_offer'] : ($price * $request->cartCoupon['percent_offer']) / 100 : $discount);
+
+        $totalPrice = $price + (($request->shippingType === true ? $request->selectAddress['shipping_cost']['normal_price'] : $request->selectAddress['shipping_cost']['express_price']) * count($products)) - ($request->couponUse === true ? $request->cartCoupon['fixed_offer'] !== null ? $request->cartCoupon['fixed_offer'] : ($price * $request->cartCoupon['percent_offer']) / 100 : $discount);
 
         $billingAddress = array('name' => $request->name, 'address' => $request->address, 'phone' => $request->phone, 'email' => $request->email);
         $deliveryStatus = array('processing' => 'running', 'warehouse' => 'pending', 'onTheWay' => 'pending', 'delivery' => 'pending');
@@ -59,17 +62,16 @@ class OrderController extends Controller
                     'cvc' => $request->cvc,
                 ]
             ]);
-            $email = Auth::user()->email;
 
             $customer = Customer::create([
-                'email' => $email,
+                'email' => Auth::user()->email,
                 'source' => $token,
             ]);
 
             $charge = Charge::create([
                 'customer' => $customer->id,
-                'amount' => $totalPrice * 100,
-                'currency' => 'usd',
+                'amount' => ($totalPrice * $request->currency['rate']) * 100,
+                'currency' => $request->currency['name'],
             ]);
         }
 
@@ -78,7 +80,7 @@ class OrderController extends Controller
         $order->coupon_id = $request->couponUse === true ? $request->cartCoupon['id'] : null;
         $order->price = $price;
         $order->discount = $request->couponUse === true ? null : $discount;
-        $order->shipping_fee = $request->shippingType === true ? $shipping['normal_price'] : $shipping['express_price'];
+        $order->shipping_fee = ($request->shippingType === true ? $request->selectAddress['shipping_cost']['normal_price'] : $request->selectAddress['shipping_cost']['express_price']) * count($products);
         $order->coupon = $request->couponUse === true ? $request->cartCoupon['fixed_offer'] !== null ? $request->cartCoupon['fixed_offer'] : ($price * $request->cartCoupon['percent_offer']) / 100 : null;
         $order->total_price = $totalPrice;
         $order->shipping_address = json_encode($request->selectAddress);
@@ -87,27 +89,26 @@ class OrderController extends Controller
         $order->payment_type = $request->paymentType;
         $order->delivery_status = json_encode($deliveryStatus);
         $order->save();
-        foreach ($carts as $data) {
+        foreach ($products as $data) {
             $orderProducts = new OrderProduct();
             $orderProducts->order_id = $order->id;
-            $orderProducts->product_id = $data->product->id;
-            $orderProducts->product_color = $data->color->name;
-            $orderProducts->product_color_code = $data->color->color;
-            $orderProducts->product_variant = $data->variant->variant;
-            $orderProducts->product_quantity = $data->quantity;
-            $orderProducts->product_price = $data->product->price;
+            $orderProducts->product_id = $data['product']->id;
+            $orderProducts->product_color = $data['cart']['color_name'];
+            $orderProducts->product_color_code = $data['cart']['color_code'];
+            $orderProducts->product_variant = $data['cart']['variant'];
+            $orderProducts->product_quantity = $data['cart']['quantity'];
+            $orderProducts->product_price = $data['product']->price;
             $orderProducts->save();
-            $data->delete();
         }
         if ($request->couponUse === true) {
-            $coupon = Coupon::findOrFail($request->cartCoupon['id'])->increment('total_use');
+            Coupon::find($request->cartCoupon['id'])->increment('total_use');
         }
         return response()->json($order->id);
     }
 
     public function order($id)
     {
-        $order = Order::where('user_id', Auth::id())->with('user', 'products','products.product')->findOrFail($id);
+        $order = Order::where('user_id', Auth::id())->with('user', 'products','products.product')->find($id);
         return response()->json($order);
     }
 
